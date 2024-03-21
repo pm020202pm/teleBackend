@@ -34,10 +34,10 @@ export const getAFile= async (req,res, next) => {
     console.log(id)
     const item = await client.getMessages("me", {ids:id})
     const buffer = await client.downloadMedia(item[0],{})
-    await fs.writeFile("files/"+fileName,buffer);
+    await fs.writeFile("files/"+fileName,buffer).then(() => {res.sendfile("files/"+fileName);});
     await user.save();
     await client.disconnect();
-    res.sendfile("files/"+fileName);
+    await fs.unlink("files/"+fileName);
 }
 
 export const checkLogin = (req,res) => {
@@ -113,6 +113,8 @@ export const addToCollection = async (req,res, next) => {
                 }
             }
         }
+        await fs.unlink(`files/${file[i]}`);
+
     }
     await user.save();
     await client.disconnect()
