@@ -9,13 +9,19 @@ export const getAllFilesFromACollection = (req,res) => {
     const docId = req.body.docId
     console.log(user._id)
     if(user._id == docId){
-        res.json(user.files)
+        res.json({
+            "folderIndex":"-1",
+            "files" :user.files
+        })
     }
     else{
         const length = user.collections.length
         for(let i=0; i<length; i++){
             if(user.collections[i]._id == docId){
-                res.json(user.collections[i].files)
+                res.json({
+                    "folderIndex":i, 
+                    "files" :user.collections[i].files
+                })
             }
         }
     }
