@@ -19,7 +19,6 @@ export const getAllFilesFromACollection = (req,res) => {
             }
         }
     }
-    
 }
 
 export const getAFile= async (req,res, next) => {
@@ -84,7 +83,7 @@ export const addToCollection = async (req,res, next) => {
     }
     const docId = req.body.docId
     const file = req.files.map((file) => file.filename);
-    const originalFileName = req.fileOrgName
+    const originalFileName = req.files.map((file) => file.originalname);
     const size = file.length;
     const user = req.body.user
     const sessionString = user.session
@@ -92,21 +91,22 @@ export const addToCollection = async (req,res, next) => {
     const client = new TelegramClient(session,apiCred.apiId,apiCred.apiHash,{connectionRetries:CONNECTION_RETRIES})
     await client.connect()
     for (let i = 0; i< size; i++) {
-        var item = await client.sendFile("me",{file:`files/${file[i]}`,caption:originalFileName}) 
+        let fName = originalFileName[i]
+        var item = await client.sendFile("me",{file:`files/${file[i]}`,caption:originalFileName[i]}) 
         if(user._id == docId){
             user.files.push({
                 id: item.id,
-                name: originalFileName,
+                name: fName,
                 type: "file"
             })
         }
         else{
             const size = user.collections.length
-            for(let i=0; i<size; i++){
-                if(user.collections[i]._id == docId){
-                    user.collections[i].files.push({
+            for(let j=0; j<size; j++){
+                if(user.collections[j]._id == docId){
+                    user.collections[j].files.push({
                         id: item.id,
-                        name: originalFileName,
+                        name: fName,
                         type: "file"
                     })
                     break;

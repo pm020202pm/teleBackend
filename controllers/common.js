@@ -21,12 +21,14 @@ export const signUpHandler = async (req, res,next) => {
 export const loginHandler = async (req, res, next) => {
     try {
         const { phoneNo, password } = req.body
-        console.log(phoneNo,password)
         const b = await loginUser(phoneNo, password)
-        if (b) {
-            res.json({ token: b })
-        } else {
-            res.json("Error Logging in")
+        if (b=="First Sign up") {
+            res.json("First sign up")
+            
+        } else if(b!="First Sign up" && b!=false) {
+            res.json(b)
+        } else{
+            res.json("Error logging in")
         }
     } catch (error) {
         next(error)

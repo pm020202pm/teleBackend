@@ -3,7 +3,7 @@ import { errorTest, signUpHandler, test, loginHandler } from "../controllers/com
 import { sendCodeHandler, teleLoginHandler } from "../controllers/auth.js";
 import { authMiddleware } from "../middleware/authorize.js";
 import multer from "multer";
-import { deleteFile } from "../model/db.js";
+import { deleteFile, deleteFolder } from "../model/db.js";
 // import { FileHandler } from "../controllers/sendFile.js";
 import { addToCollection, createCollection, getAFile, checkLogin, getAllFilesFromACollection} from "../controllers/collections.js";
 
@@ -37,7 +37,8 @@ router.get("/checkLogin",authMiddleware,checkLogin)
 router.get("/getAllFilesFromCollection",authMiddleware,getAllFilesFromACollection)
 router.get("/getAFile",authMiddleware,getAFile)
 router.post("/createCollection",authMiddleware,createCollection)
-router.delete("/deleteFile/",authMiddleware,deleteFile)
+router.get("/deleteFile/",authMiddleware,deleteFile)
+router.get("/deleteFolder/",authMiddleware,deleteFolder)
 router.post("/addToCollection", upload.array('files'),authMiddleware, addToCollection)
 // router.get("/getAllCollections",authMiddleware,getAllCollections)
 // router.post("/upload-file", upload.array('files'),authMiddleware, FileHandler)
