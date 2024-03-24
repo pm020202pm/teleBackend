@@ -4,7 +4,6 @@ import { dbUri } from "../config.js";
 import { StringSession } from "telegram/sessions/index.js";
 import { CONNECTION_RETRIES, apiCred } from "../config.js";
 import { TelegramClient, Api } from "telegram";
-import { MongoClient, ObjectId } from 'mongodb';
 
 const fileSchema = new Schema({
     id:{
@@ -76,17 +75,6 @@ export const signUpUser = async (phoneNo, password) => {
     }
 }
 
-// export const loginUser = async (phoneNo, password) => {
-//     try {
-//         const user = await User.findOne({ phoneNo })
-//         const passHash = createHash('sha256').update(password).digest('hex');
-//         if (user.password === passHash) return user._id;
-//         return false;
-//     } catch (error) {
-//         throw new Error("Error Logging in")
-//     }
-// }
-
 export const loginUser = async (phoneNo, password) => {
     try {
         const user = await User.findOne({ phoneNo })
@@ -145,25 +133,37 @@ export const deleteFile = async (req,res, next) => {
 
 
 export const deleteFolder = async (req,res, next) => {
-    const folderIndex = req.body.folderIndex
+    const folderId = req.body.folderId
+    const parentFolderId = req.body.parentFolderId
     const user = req.body.user
     const sessionString = user.session
     const session = new StringSession(sessionString)
     const client = new TelegramClient(session,apiCred.apiId,apiCred.apiHash,{connectionRetries:CONNECTION_RETRIES})
     await client.connect()
+
+    let ind;
+    for(let i=0; i<user.collections.length; i++){
+        if(user.collections[i]._id == folderId){
+            ind = i;
+            break;
+        }
+    }
         let fidArray = [];
+        let folderIdArray = [];
+        folderIdArray.push(folderId);
         async function iterateFolders(ind){
             let array = user.collections[ind].files;
+            console.log(array)
             for (let i = 0; i < array.length; ++i) {
                 let id = array[i]._id;
                 let fId = array[i].id;
                 let type = array[i].type;
                 if(type == "file"){
-                    console.log("deleting file")
                     fidArray.push(Number(fId));
                     user.collections[Number(ind)].files = user.collections[Number(ind)].files.filter(file => file._id != id)
                 }
                 else if(type == "folder") {
+                    folderIdArray.push(fId);
                     for(let i=0; i<user.collections.length; i++){
                         if(user.collections[i]._id == fId){
                             iterateFolders(i);
@@ -171,10 +171,14 @@ export const deleteFolder = async (req,res, next) => {
                     }
                 }
             }
-            
         }
-        iterateFolders(folderIndex);
+        iterateFolders(ind);
         await client.deleteMessages("me",fidArray, {revoke:true})
+        for(let i=0; i<folderIdArray.length; i++){
+            user.collections = user.collections.filter(folder => folder._id != folderIdArray[i]);
+        }
+        user.collections[parentFolderId].files = user.collections[parentFolderId].files.filter(folder => folder.id != folderId);
+
     await user.save();
     res.json("working on folders ...............")
 }
