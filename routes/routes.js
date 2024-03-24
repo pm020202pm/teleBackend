@@ -3,9 +3,9 @@ import { errorTest, signUpHandler, test, loginHandler } from "../controllers/com
 import { sendCodeHandler, teleLoginHandler } from "../controllers/auth.js";
 import { authMiddleware } from "../middleware/authorize.js";
 import multer from "multer";
-import { deleteFile, deleteFolder } from "../model/db.js";
+// import { deleteFile, deleteFolder } from "../model/db.js";
 // import { FileHandler } from "../controllers/sendFile.js";
-import { addToCollection, createCollection, getAFile, checkLogin, getAllFilesFromACollection} from "../controllers/collections.js";
+import { addToCollection, createCollection, getAFile, checkLogin, getAllFilesFromACollection, deleteFile, deleteFolder} from "../controllers/collections.js";
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -40,6 +40,3 @@ router.post("/createCollection",authMiddleware,createCollection)
 router.get("/deleteFile/",authMiddleware,deleteFile)
 router.get("/deleteFolder/",authMiddleware,deleteFolder)
 router.post("/addToCollection", upload.array('files'),authMiddleware, addToCollection)
-// router.get("/getAllCollections",authMiddleware,getAllCollections)
-// router.post("/upload-file", upload.array('files'),authMiddleware, FileHandler)
-// router.get("/getAllFiles",authMiddleware,getAllFiles)
